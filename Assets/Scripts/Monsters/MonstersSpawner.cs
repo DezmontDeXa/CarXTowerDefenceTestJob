@@ -15,6 +15,7 @@ namespace TowerDefence
         {
 			_settings = settings;
 			_monstersPool = monstersPool;
+			m_lastSpawn = -_settings.Interval;
 		}
 
 		public void Tick()

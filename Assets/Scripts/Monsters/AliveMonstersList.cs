@@ -5,14 +5,14 @@ using VContainer.Unity;
 
 namespace TowerDefence
 {
-	public class AliveMonstersTracker : IInitializable, IDisposable
+	public class AliveMonstersList : IInitializable, IDisposable
 	{
 		private PoolablesLinkedPool<Monster> _pool;
 		private List<Monster> _aliveMonsters;
 
 		public IEnumerable<Monster> AliveMonsters => _aliveMonsters;
 
-		public AliveMonstersTracker(PoolablesLinkedPool<Monster> pool)
+		public AliveMonstersList(PoolablesLinkedPool<Monster> pool)
 		{
 			_pool = pool;
 			_aliveMonsters = new List<Monster>();

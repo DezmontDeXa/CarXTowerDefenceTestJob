@@ -41,7 +41,7 @@ namespace TowerDefence.Infrastructure.Pools
 
 		private void OnGetItem(T t)
 		{
-			t.OnSpawn(()=>_pool.Release(t));
+			t.OnSpawn(()=>Release(t));
 		}
 
 		private void OnReleaseItem(T t)

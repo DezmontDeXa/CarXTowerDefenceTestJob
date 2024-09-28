@@ -1,36 +1,36 @@
 ﻿using UnityEngine;
 using TowerDefence.Infrastructure.Pools;
 using System;
+using TowerDefence.DamageDealers;
 
 namespace TowerDefence.Projectilies
 {
 	public abstract class ProjectileBase : MonoBehaviour, IPoolable
 	{
-		[SerializeField] protected float _speed = 0.2f;
-		[SerializeField] private float _lifetime = 5f;
-
+		[SerializeField] private float _yDeadZone = 0;
 		private Action _releaseAction;
-		private float _spawnedOn;
 
 		protected virtual void Update()
 		{
-			if (_spawnedOn + _lifetime < Time.time)
+			if(transform.position.y < _yDeadZone)
 				Release();
 		}
 
 		private void OnTriggerEnter(Collider other)
 		{
+			if (!other.gameObject.TryGetComponent<IDamageTaker>(out var damageTaker))
+				return;
+
 			Release();
 		}
 
-		public void OnSpawn(Action releaseAction)
+		public virtual void OnSpawn(Action releaseAction)
 		{
 			_releaseAction = releaseAction;
-			_spawnedOn = Time.time;
 			gameObject.SetActive(true);
 		}
 
-		public void OnDespawn()
+		public virtual void OnDespawn()
 		{
 			gameObject.SetActive(false);
 		}

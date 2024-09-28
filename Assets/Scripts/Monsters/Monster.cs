@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace TowerDefence
 {
-	public class Monster : MonoBehaviour, IDamageTaker, IPoolable
+	public class Monster : MonoBehaviour, IDamageTaker, IPoolable, IMovableTarget
 	{
-		[SerializeField] private float _speed = 0.1f;
+		[SerializeField] private float _speed = 1f;
 		[SerializeField] private int _maxHP = 30;
 		private Transform _moveTarget;
 		const float _reachDistance = 0.3f;
@@ -16,6 +16,16 @@ namespace TowerDefence
 		private int _hp;
 		private Rigidbody _rigidbody;
 		private Action _releaseAction;
+		private Vector3 _direction;
+		[SerializeField]private Vector3 _actualVelocity;
+
+		public Vector3 Position => transform.position;
+
+		public Vector3 Direction => _direction;
+
+		public Vector3 Velocity=>_direction*_speed;
+
+		public float Speed => _speed;
 
 		private void Awake()
 		{
@@ -35,9 +45,11 @@ namespace TowerDefence
 				return;
 			}
 
-			var direction = _moveTarget.transform.position - transform.position;
+			_direction = (_moveTarget.transform.position - transform.position).normalized;
 
-			_rigidbody.MovePosition(transform.position + (direction.normalized * _speed));
+			var moveOffset = Velocity * Time.deltaTime;
+
+			transform.position += moveOffset;
 		}
 
 		public void SetMoveTarget(Transform target)
@@ -47,7 +59,7 @@ namespace TowerDefence
 
 		public void TakeDamage(int damage)
 		{
-			_hp-=damage;
+			_hp -= damage;
 
 			if (_hp <= 0)
 				_releaseAction?.Invoke();

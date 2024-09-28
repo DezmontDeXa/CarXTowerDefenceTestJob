@@ -4,7 +4,9 @@ namespace TowerDefence.Projectilies
 {
 	public class GuidedProjectile : ProjectileBase
 	{
-		private Transform _target;
+		[SerializeField] protected float _speed = 0.2f;
+
+		private IMovableTarget _target;
 
 		protected override void Update()
 		{
@@ -14,7 +16,7 @@ namespace TowerDefence.Projectilies
 				return;
 			}
 
-			var translation = _target.transform.position - transform.position;
+			var translation = _target.Position - transform.position;
 
 			translation = CeilingSpeed(translation);
 
@@ -23,7 +25,7 @@ namespace TowerDefence.Projectilies
 			base.Update();
 		}
 
-		public void SetTarget(Transform target)
+		public void SetTarget(IMovableTarget target)
 		{
 			_target = target;
 		}
@@ -32,6 +34,7 @@ namespace TowerDefence.Projectilies
 		{
 			if (translation.magnitude > _speed)
 				translation = translation.normalized * _speed;
+
 			return translation;
 		}
 

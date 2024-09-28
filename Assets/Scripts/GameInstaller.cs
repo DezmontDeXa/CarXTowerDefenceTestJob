@@ -2,6 +2,7 @@
 using TowerDefence.Infrastructure;
 using TowerDefence.Infrastructure.Pools;
 using TowerDefence.Projectilies;
+using TowerDefence.Towers;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
@@ -21,11 +22,21 @@ namespace Assets.Scripts
 		[SerializeField] private ProjectilesFactory<CannonProjectile>.Settings _cannonProjetilesFactorySettings;
 		[SerializeField] private ProjectilesFactory<GuidedProjectile>.Settings _guidedProjetilesFactorySettings;
 
+		[Header("Towers")]
+		[SerializeField] private CannonTowerData _cannonTowerData;
+
 		public override void Install(IContainerBuilder builder)
 		{
 			BindMonsters(builder);
 
 			BindProjectiles(builder);
+
+			BindTowers(builder);
+		}
+
+		private void BindTowers(IContainerBuilder builder)
+		{
+			builder.RegisterInstance(_cannonTowerData).AsImplementedInterfaces().AsSelf();
 		}
 
 		private void BindMonsters(IContainerBuilder builder)
@@ -43,7 +54,7 @@ namespace Assets.Scripts
 				.WithParameter("settings", _monstersSpawnerSettings);
 
 			builder
-				.Register<AliveMonstersTracker>(Lifetime.Singleton)
+				.Register<AliveMonstersList>(Lifetime.Singleton)
 				.AsImplementedInterfaces()
 				.AsSelf();
 		}

@@ -1,14 +1,33 @@
-﻿namespace TowerDefence.Projectilies
+﻿using System;
+using UnityEngine;
+
+namespace TowerDefence.Projectilies
 {
 	public class CannonProjectile : ProjectileBase
 	{
-		protected override void Update()
+		private float _calculatedFlyTime;
+		private float _startTime;
+
+		public Rigidbody Rigidbody { get; private set; }
+
+		private void Awake()
 		{
-			var translation = transform.forward * _speed;
+			Rigidbody = GetComponent<Rigidbody>();
+		}
 
-			transform.Translate(translation);
+		public override void OnDespawn()
+		{
+			base.OnDespawn();
+			Rigidbody.velocity = Vector3.zero;
+			var real = Time.time - _startTime;
+			var diff = _calculatedFlyTime - real;
+			Debug.Log($"Calculated: {_calculatedFlyTime}, Real: {real}, Diff: {diff}");
+		}
 
-			base.Update();
+		internal void DebugFlyTime(float calculatedFlyTime)
+		{
+			_calculatedFlyTime = calculatedFlyTime;
+			_startTime = Time.time;
 		}
 	}
 }
