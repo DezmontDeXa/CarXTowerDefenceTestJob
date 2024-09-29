@@ -1,8 +1,9 @@
-﻿using UnityEngine;
+﻿using TowerDefence.Infrastructure;
+using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
-namespace Assets.Scripts
+namespace TowerDefence
 {
 	public class GameRoot : LifetimeScope
 	{

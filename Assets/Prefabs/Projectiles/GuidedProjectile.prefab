@@ -4856,7 +4856,6 @@ GameObject:
   - component: {fileID: 469626}
   - component: {fileID: 13564084}
   - component: {fileID: 5744539433843631978}
-  - component: {fileID: 2861055645596612602}
   m_Layer: 0
   m_Name: GuidedProjectile
   m_TagString: Untagged
@@ -4913,18 +4912,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8547a8887ef407d4abecf14ed781606d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _lifetime: 5
-  _speed: 0.2
---- !u!114 &2861055645596612602
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 121420}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3958b65e11263954e91ad7c8ae1b5ee2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
   _damage: 10
+  _yDeadZone: 0
+  _speed: 0.2

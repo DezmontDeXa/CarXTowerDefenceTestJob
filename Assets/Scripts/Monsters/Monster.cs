@@ -1,31 +1,34 @@
 ﻿using System;
-using TowerDefence.DamageDealers;
+using TowerDefence.Abstractions.Monsters;
 using TowerDefence.Infrastructure.Pools;
 using UnityEngine;
 
-namespace TowerDefence
+namespace TowerDefence.Monsters
 {
-	public class Monster : MonoBehaviour, IDamageTaker, IPoolable, IMovableTarget
+	public class Monster : MonoBehaviour, IPoolable, IMonster
 	{
 		[SerializeField] private float _speed = 1f;
 		[SerializeField] private int _maxHP = 30;
+
 		private Transform _moveTarget;
 		const float _reachDistance = 0.3f;
-		[SerializeField] private float _lostDistanace = 0;
+		private float _lostDistanace = 0;
 
 		private int _hp;
 		private Rigidbody _rigidbody;
 		private Action _releaseAction;
 		private Vector3 _direction;
-		[SerializeField]private Vector3 _actualVelocity;
+		private Vector3 _actualVelocity;
 
 		public Vector3 Position => transform.position;
 
 		public Vector3 Direction => _direction;
 
-		public Vector3 Velocity=>_direction*_speed;
+		public Vector3 Velocity => _direction * _speed;
 
 		public float Speed => _speed;
+
+		public event Action<IMonster> Died;
 
 		private void Awake()
 		{
@@ -62,7 +65,13 @@ namespace TowerDefence
 			_hp -= damage;
 
 			if (_hp <= 0)
-				_releaseAction?.Invoke();
+				Die();
+		}
+
+		private void Die()
+		{
+			Died?.Invoke(this);
+			_releaseAction?.Invoke();
 		}
 
 		public void OnSpawn(Action releaseAction)

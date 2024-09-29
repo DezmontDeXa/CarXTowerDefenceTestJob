@@ -150,5 +150,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _speed: 5
   _maxHP: 500
-  _lostDistanace: 0
-  _actualVelocity: {x: 0, y: 0, z: 0}

@@ -9,11 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7829694d48c611b4e846e09c57977b3d, type: 3}
+  m_Script: {fileID: 11500000, guid: 02316a92c2c33e54ebbb02b555ced1d1, type: 3}
   m_Name: Cannon Tower Data
   m_EditorClassIdentifier: 
   _shootInterval: 0.5
   _range: 20
+  _projectilePrefab: {fileID: 5088357942341298556, guid: 4124357cfe121804f9eea0a690ce3b52, type: 3}
   _predictPrecision: 0.01
   _trajectory: 0
-  _rotationSpeed: 25
+  _rotationSpeed: 45

@@ -1,85 +1,68 @@
-﻿using TowerDefence;
+﻿using TowerDefence.Abstractions.Monsters.Collections;
 using TowerDefence.Infrastructure;
-using TowerDefence.Infrastructure.Pools;
-using TowerDefence.Projectilies;
-using TowerDefence.Towers;
+using TowerDefence.Monsters.Factories;
+using TowerDefence.Monsters.Pools;
+using TowerDefence.Monsters.Spawners;
+using TowerDefence.Projectilies.Factories;
+using TowerDefence.Projectilies.Pools;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
-namespace Assets.Scripts
+namespace TowerDefence
 {
 	public class GameInstaller : MonoInstallerBase
 	{
 		[Header("Monsters")]
-		[SerializeField] private MonstersFactory.Settings _monstersFactorySettings;
-		[SerializeField] private MonstersPool.Settings _monstersPoolSettings;
+		[SerializeField] private MonstersPools.Settings _monstersPoolSettings;
 		[SerializeField] private MonstersSpawner.Settings _monstersSpawnerSettings;
 
 		[Header("Projectiles")]
-		[SerializeField] private ProjectilesPool<CannonProjectile>.Settings _cannonProjetilesPoolSettings;
-		[SerializeField] private ProjectilesPool<GuidedProjectile>.Settings _guidedProjetilesPoolSettings;
-		[SerializeField] private ProjectilesFactory<CannonProjectile>.Settings _cannonProjetilesFactorySettings;
-		[SerializeField] private ProjectilesFactory<GuidedProjectile>.Settings _guidedProjetilesFactorySettings;
-
-		[Header("Towers")]
-		[SerializeField] private CannonTowerData _cannonTowerData;
+		[SerializeField] private ProjectilesPools.Settings _projetilesPoolSettings;
 
 		public override void Install(IContainerBuilder builder)
 		{
 			BindMonsters(builder);
 
 			BindProjectiles(builder);
-
-			BindTowers(builder);
-		}
-
-		private void BindTowers(IContainerBuilder builder)
-		{
-			builder.RegisterInstance(_cannonTowerData).AsImplementedInterfaces().AsSelf();
 		}
 
 		private void BindMonsters(IContainerBuilder builder)
 		{
 			builder
-				.Register<IFactory<Monster>, MonstersFactory>(Lifetime.Singleton)
-				.WithParameter("settings", _monstersFactorySettings);
+				.Register<MonstersFactories>(Lifetime.Singleton)
+				.AsSelf();
 
 			builder
-				.Register<PoolablesLinkedPool<Monster>, MonstersPool>(Lifetime.Singleton)
-				.WithParameter("settings", _monstersPoolSettings);
+				.Register<MonstersPools>(Lifetime.Singleton)
+				.WithParameter("settings", _monstersPoolSettings)
+				.AsImplementedInterfaces()
+				.AsSelf();
+
 
 			builder
 				.RegisterEntryPoint<MonstersSpawner>(Lifetime.Singleton)
-				.WithParameter("settings", _monstersSpawnerSettings);
+				.WithParameter("settings", _monstersSpawnerSettings)
+				.AsSelf();
 
 			builder
-				.Register<AliveMonstersList>(Lifetime.Singleton)
-				.AsImplementedInterfaces()
-				.AsSelf();
+				.Register<AliveMonstersCollection>(Lifetime.Singleton)
+				.AsImplementedInterfaces();
 		}
 
 		private void BindProjectiles(IContainerBuilder builder)
 		{
 			builder
-				.Register<IFactory<CannonProjectile>, ProjectilesFactory<CannonProjectile>>(Lifetime.Singleton)
-				.WithParameter("settings", _cannonProjetilesFactorySettings);
-
-			builder
-				.Register<IFactory<GuidedProjectile>, ProjectilesFactory<GuidedProjectile>>(Lifetime.Singleton)
-				.WithParameter("settings", _guidedProjetilesFactorySettings);
-
-			builder
-				.Register<PoolablesLinkedPool<CannonProjectile>, ProjectilesPool<CannonProjectile>>(Lifetime.Transient)
-				.WithParameter("settings", _cannonProjetilesPoolSettings)
-				.AsImplementedInterfaces()
+				.Register<ProjectilesFactories>(Lifetime.Singleton)
 				.AsSelf();
 
 			builder
-				.Register<PoolablesLinkedPool<GuidedProjectile>, ProjectilesPool<GuidedProjectile>>(Lifetime.Transient)
-				.WithParameter("settings", _guidedProjetilesPoolSettings)
+				.Register<ProjectilesPools>(Lifetime.Singleton)
+				.WithParameter("settings", _projetilesPoolSettings)
 				.AsImplementedInterfaces()
 				.AsSelf();
 		}
+
+
 	}
 }

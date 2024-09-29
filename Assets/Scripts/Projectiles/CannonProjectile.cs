@@ -1,4 +1,4 @@
-﻿using System;
+﻿using TowerDefence.Abstractions.Projectilies;
 using UnityEngine;
 
 namespace TowerDefence.Projectilies
@@ -7,24 +7,28 @@ namespace TowerDefence.Projectilies
 	{
 		private float _calculatedFlyTime;
 		private float _startTime;
-
-		public Rigidbody Rigidbody { get; private set; }
+		private Rigidbody _rigidbody;
 
 		private void Awake()
 		{
-			Rigidbody = GetComponent<Rigidbody>();
+			_rigidbody = GetComponent<Rigidbody>();
 		}
 
 		public override void OnDespawn()
 		{
 			base.OnDespawn();
-			Rigidbody.velocity = Vector3.zero;
+			_rigidbody.velocity = Vector3.zero;
 			var real = Time.time - _startTime;
 			var diff = _calculatedFlyTime - real;
-			Debug.Log($"Calculated: {_calculatedFlyTime}, Real: {real}, Diff: {diff}");
+			//Debug.Log($"Calculated: {_calculatedFlyTime}, Real: {real}, Diff: {diff}");
 		}
 
-		internal void DebugFlyTime(float calculatedFlyTime)
+		public void Push(Vector3 force)
+		{
+			_rigidbody.AddForce(force, ForceMode.VelocityChange);
+		}
+
+		public void DebugFlyTime(float calculatedFlyTime)
 		{
 			_calculatedFlyTime = calculatedFlyTime;
 			_startTime = Time.time;

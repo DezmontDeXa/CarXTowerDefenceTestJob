@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using TowerDefence.Abstractions.Monsters;
+using TowerDefence.Abstractions.Projectilies;
+using UnityEngine;
 
 namespace TowerDefence.Projectilies
 {
@@ -6,7 +8,7 @@ namespace TowerDefence.Projectilies
 	{
 		[SerializeField] protected float _speed = 0.2f;
 
-		private IMovableTarget _target;
+		private IMonster _target;
 
 		protected override void Update()
 		{
@@ -25,7 +27,7 @@ namespace TowerDefence.Projectilies
 			base.Update();
 		}
 
-		public void SetTarget(IMovableTarget target)
+		public void SetTarget(IMonster target)
 		{
 			_target = target;
 		}

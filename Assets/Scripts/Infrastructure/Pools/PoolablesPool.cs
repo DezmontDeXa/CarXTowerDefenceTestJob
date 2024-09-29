@@ -3,7 +3,8 @@ using UnityEngine.Pool;
 
 namespace TowerDefence.Infrastructure.Pools
 {
-	public class PoolablesLinkedPool<T>  where T : class, IPoolable
+	public class PoolablesLinkedPool<T>  
+		where T : class, IPoolable
 	{
 		private LinkedPool<T> _pool;
 		private readonly IFactory<T> _factory;

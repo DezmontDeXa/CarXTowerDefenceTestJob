@@ -1,0 +1,18 @@
+{
+    "name": "TowerDefence.Monsters",
+    "rootNamespace": "TowerDefence.Monsters",
+    "references": [
+        "GUID:1e2385e880bff2d44a799a017d33001c",
+        "GUID:53ca1626559deef48b6b013c2b485eac",
+        "GUID:b0214a6008ed146ff8f122a6a9c2f6cc"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

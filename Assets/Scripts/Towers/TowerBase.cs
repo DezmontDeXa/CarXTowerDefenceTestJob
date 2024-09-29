@@ -1,49 +1,49 @@
-﻿using TowerDefence.Infrastructure.Pools;
+﻿using AYellowpaper;
+using TowerDefence.Abstractions.Monsters;
+using TowerDefence.Abstractions.Projectilies;
+using TowerDefence.Abstractions.Projectilies.Pools;
+using TowerDefence.Abstractions.Towers;
+using TowerDefence.Abstractions.Towers.TargetSelectors;
 using UnityEngine;
 using VContainer;
 
 namespace TowerDefence.Towers
 {
-	public abstract class TowerBase<TProjectile> : MonoBehaviour 
-		where TProjectile : Component, IPoolable
+	public abstract class TowerBase<TTowerData, TProjectile> : MonoBehaviour, ITower
+		where TTowerData : TowerData<TProjectile>
+		where TProjectile : ProjectileBase
 	{
 		[SerializeField] private Transform _shootPoint;
+		[SerializeField] private InterfaceReference<TTowerData> _towerData;
+		[SerializeField] private InterfaceReference<ISingleTargetSelector> _singleTargetSelector;
 
-		private float _lastShotTime = -0.5f;
-		private ITowerData _towerData;
-		private ISingleTargetSelector _targetSelector;
-		private PoolablesLinkedPool<TProjectile> _projectilesPool;
+		private float _lastShotTime;
+		private IProjectilesPool<ProjectileBase> _projectilesPool;
 
 		protected Transform ShootPoint => _shootPoint;
 
+		protected TTowerData TowerData => _towerData.Value;
+
 		[Inject]
-		private void Constructor(
-			ITowerData towerData,
-			PoolablesLinkedPool<TProjectile> projectilesPool)
+		private void Constructor(IProjectilesPools projectilesPools)
 		{
-			_towerData = towerData;
-			_projectilesPool = projectilesPool;
+			_projectilesPool = projectilesPools.GetPoolByPrefab(_towerData.Value.ProjectilePrefab);
 		}
 
-		protected virtual void Update()
+
+		protected void Update()
 		{
-			if ( _shootPoint == null)
+			if (_shootPoint == null)
 			{
-				Debug.LogWarning("SimpleTower: _shootPoint is null");
+				Debug.LogWarning($"{GetType().Name}: _shootPoint is null");
 				return;
 			}
 
 			var target = SelectTarget();
 
 			PrepareForTarget(target);
-
-			if (target == null)
-				return;
-
-			if (_lastShotTime + _towerData.ShootInterval > Time.time)
-				return;
-
-			if (!CanShoot())
+				
+			if (!CanShoot(target))
 				return;
 
 			Shoot(target);
@@ -51,27 +51,37 @@ namespace TowerDefence.Towers
 			_lastShotTime = Time.time;
 		}
 
-		protected virtual void PrepareForTarget(IMovableTarget target) { }
 
-		protected virtual void OnShoot(IMovableTarget monster, TProjectile projectile) { }
+		protected virtual void PrepareForTarget(IMonster target) { }
 
-		private IMovableTarget SelectTarget()
+		protected virtual bool OnCanShoot() { return true; }
+
+		protected virtual void OnShoot(TProjectile projectile, IMonster target) { }
+
+
+		private IMonster SelectTarget()
 		{
-			return _targetSelector.SelectTarget(transform.position, _towerData);
+			return _singleTargetSelector.Value.SelectTarget(transform.position, _towerData.Value.Range);
 		}
 
-		protected virtual bool CanShoot()
+		private bool CanShoot(IMonster target)
 		{
-			return true;
+			if (target == null)
+				return false;
+
+			if (_lastShotTime + _towerData.Value.ShootInterval > Time.time)
+				return false;
+
+			return OnCanShoot();
 		}
 
-		private void Shoot(IMovableTarget monster)
+		private void Shoot(IMonster target)
 		{
-			var projectile = _projectilesPool.Spawn();
+			var projectile = (TProjectile)_projectilesPool.Spawn();
 
-			projectile.transform.position = _shootPoint.transform.position;
+			projectile.Position = _shootPoint.transform.position;
 
-			OnShoot(monster, projectile);
+			OnShoot(projectile, target);
 		}
 	}
 }
