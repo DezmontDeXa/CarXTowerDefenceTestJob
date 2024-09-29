@@ -11,15 +11,16 @@ namespace TowerDefence.Towers.UI
 
 		private void OnEnable()
 		{
-			_tower.Value.LoadingProgressChanged += Value_LoadingProgressChanged;
+			_tower.Value.LoadingProgressChanged += TowerLoadingProgressChanged;
+			_view.SetProgress(0);
 		}
 
 		private void OnDisable()
 		{
-			_tower.Value.LoadingProgressChanged -= Value_LoadingProgressChanged;
+			_tower.Value.LoadingProgressChanged -= TowerLoadingProgressChanged;
 		}
 
-		private void Value_LoadingProgressChanged(ITower arg1, float arg2)
+		private void TowerLoadingProgressChanged(ITower arg1, float arg2)
 		{
 			_view.SetProgress(arg2);
 		}

@@ -15,24 +15,36 @@ namespace TowerDefence.Towers
 		where TProjectile : ProjectileBase
 	{
 		[SerializeField] private Transform _shootPoint;
-		[SerializeField] private InterfaceReference<TTowerData> _towerData;
+		[SerializeField] private TTowerData _towerData;
 		[SerializeField] private InterfaceReference<ISingleTargetSelector> _singleTargetSelector;
 
 		private float _lastShotTime;
 		private IProjectilesPool<ProjectileBase> _projectilesPool;
+		private float _loadingProgress;
+
+
+		public TTowerData TowerData => _towerData;
+
+		public float LoadingProgress
+		{
+			get => _loadingProgress;
+			private set
+			{
+				_loadingProgress = value;
+
+				LoadingProgressChanged?.Invoke(this, LoadingProgress);
+			}
+		}
 
 		protected Transform ShootPoint => _shootPoint;
 
-		protected TTowerData TowerData => _towerData.Value;
-
-		public float LoadingProgress { get; private set; }
-
 		public event Action<ITower, float> LoadingProgressChanged;
+
 
 		[Inject]
 		private void Constructor(IProjectilesPools projectilesPools)
 		{
-			_projectilesPool = projectilesPools.GetPoolByPrefab(_towerData.Value.ProjectilePrefab);
+			_projectilesPool = projectilesPools.GetPoolByPrefab(_towerData.ProjectilePrefab);
 		}
 
 
@@ -46,9 +58,9 @@ namespace TowerDefence.Towers
 
 			var target = SelectTarget();
 
-			PrepareForTarget(target);
+			LoadingProgress = GetLoadingProgress();
 
-			UpdateProgress();
+			PrepareForTarget(target);
 
 			if (!CanShoot(target))
 				return;
@@ -58,18 +70,11 @@ namespace TowerDefence.Towers
 			_lastShotTime = Time.time;
 		}
 
-		private void UpdateProgress()
-		{
-			LoadingProgress = GetLoadingProgress();
-
-			LoadingProgressChanged.Invoke(this, LoadingProgress);
-		}
-
 		private float GetLoadingProgress()
 		{
 			var loadedTime = Time.time - _lastShotTime;
 
-			var amount = loadedTime / _towerData.Value.ShootInterval;
+			var amount = loadedTime / _towerData.ShootInterval;
 
 			if (amount > 1f)
 				amount = 1;
@@ -86,7 +91,7 @@ namespace TowerDefence.Towers
 
 		private IMonster SelectTarget()
 		{
-			return _singleTargetSelector.Value.SelectTarget(transform.position, _towerData.Value.Range);
+			return _singleTargetSelector.Value.SelectTarget(transform.position, _towerData.Range);
 		}
 
 		private bool CanShoot(IMonster target)
@@ -94,7 +99,7 @@ namespace TowerDefence.Towers
 			if (target == null)
 				return false;
 
-			if (_lastShotTime + _towerData.Value.ShootInterval > Time.time)
+			if (LoadingProgress<1f)
 				return false;
 
 			return OnCanShoot();

@@ -3,37 +3,38 @@ using TowerDefence.Abstractions.Towers.TargetSelectors;
 using TowerDefence.Projectilies;
 using TowerDefence.Tools;
 using TowerDefence.Towers.Cannon.Balistics;
+using TowerDefence.Towers.Cannon.Balistics.Entities;
 using TowerDefence.Towers.Cannon.Data;
+using TowerDefence.Towers.Rotations;
 using UnityEngine;
 using VContainer;
 
 namespace TowerDefence.Towers.Cannon
 {
 	[RequireComponent(typeof(ISingleTargetSelector))]
+	[RequireComponent(typeof(ITowerRotation))]
 	public class CannonTower : TowerBase<CannonTowerData, CannonProjectile>
 	{
-		[SerializeField] private Transform _yawTransform;
-		[SerializeField] private Transform _pitchTransform;
-		[SerializeField] private bool _showDebugInfo = false;
-
 		private Vector3 _shootVector;
 		private Vector3 _predictedPosition;
-		private Quaternion _yawDefautRotation;
-		private Quaternion _pitchDefaultRotation;
 		private float _flytime;
-		private GizmosDrawer _gizmosDrawer;
 		private bool _targetCapruted;
+		private ITowerRotation _towerRotation;
+
+#if UNITY_EDITOR
+		[SerializeField] private bool _showDebugInfo = false;
+		private GizmosDrawer _gizmosDrawer;
 
 		[Inject]
 		private void Constructor(GizmosDrawer gizmosDrawer)
 		{
 			_gizmosDrawer = gizmosDrawer;
 		}
+#endif
 
-		private void Awake()
+		protected void Awake()
 		{
-			_yawDefautRotation = _yawTransform.rotation;
-			_pitchDefaultRotation = _pitchTransform.rotation;
+			_towerRotation = GetComponent<ITowerRotation>();
 		}
 
 		protected override void OnShoot(CannonProjectile projectile, IMonster target)
@@ -42,10 +43,10 @@ namespace TowerDefence.Towers.Cannon
 
 			projectile.Push(ShootPoint.forward * _shootVector.magnitude);
 
+#if UNITY_EDITOR
+
 			if (_showDebugInfo)
 			{
-				projectile.DebugFlyTime(_flytime);
-
 				var drawPosition = _predictedPosition;
 				_gizmosDrawer.AddTemporaryTask(() =>
 				{
@@ -53,6 +54,7 @@ namespace TowerDefence.Towers.Cannon
 					Gizmos.DrawSphere(drawPosition, 0.4f);
 				}, _flytime);
 			}
+#endif
 		}
 
 		protected override bool OnCanShoot()
@@ -66,9 +68,8 @@ namespace TowerDefence.Towers.Cannon
 			{
 				_targetCapruted = false;
 
-				// to defaults
-				RotateYaw(_yawDefautRotation.eulerAngles);
-				RotatePitch(_pitchDefaultRotation.eulerAngles);
+				if (_towerRotation != null)
+					_towerRotation.ToDefault(TowerData.RotationSpeed);
 
 				return;
 			}
@@ -83,78 +84,28 @@ namespace TowerDefence.Towers.Cannon
 
 			_predictedPosition = predictResult.Position;
 
-			var yawDirection = predictResult.Position - ShootPoint.position;
-			yawDirection.y = 0;
-
-			var pitchDirection = new Vector3(-predictResult.ShootCalculationResult.Angle, 0, 0);
-
-			var yawReached = RotateYaw(yawDirection);
-			var pitchReached = RotatePitch(pitchDirection);
-
-			var pitchAndYawReached = yawReached && pitchReached;
+			var pitchAndYawReached = Rotate(predictResult);
 
 			_targetCapruted = pitchAndYawReached;
 
+#if UNITY_EDITOR
 			if (_showDebugInfo)
 			{
 				BalisticsCalculations.VisualizeTrajectory(
 					ShootPoint.position, _predictedPosition, predictResult.MinimalVelocity,
 					predictResult.ShootCalculationResult.Angle, Color.blue);
 			}
+#endif
 		}
 
-		private bool RotatePitch(Vector3 pitchDirection)
+		private bool Rotate(PredictCalculationResult predictResult)
 		{
-			if (pitchDirection == Vector3.zero)
-				return false;
-
-			var frameDegress = TowerData.RotationSpeed * Time.deltaTime;
-
-			var targetPitch = Quaternion.Euler(pitchDirection);
-
-			var pitchReached = RotateAxis(_pitchTransform, targetPitch, frameDegress);
-
-			return pitchReached;
-		}
-
-		private bool RotateYaw(Vector3 yawDirection)
-		{
-			if (yawDirection == Vector3.zero)
-				return false;
-
-			var frameDegress = TowerData.RotationSpeed * Time.deltaTime;
-
-			var targetYaw = Quaternion.LookRotation(yawDirection);
-
-			var yawReached = RotateAxis(_yawTransform, targetYaw, frameDegress);
-
-			return yawReached;
-		}
-
-		private bool RotateAxis(Transform rotatedPart, Quaternion targetRotation, float frameDegress)
-		{
-			var actualRotation = rotatedPart.localRotation;
-
-			var a = Quaternion.Angle(actualRotation, targetRotation);
-
-			if (a == 0)
+			if (_towerRotation == null)
 				return true;
 
-			var t = Mathf.InverseLerp(0, a, frameDegress);
+			var pitchAndYawReached = _towerRotation.ToTarget(predictResult.Position, predictResult.ShootCalculationResult.Angle, TowerData.RotationSpeed);
 
-			var rotationReached = false;
-
-			if (t >= 1)
-			{
-				t = 1;
-				rotationReached = true;
-			}
-
-			var newRotation = Quaternion.Lerp(actualRotation, targetRotation, t);
-
-			rotatedPart.localRotation = newRotation;
-
-			return rotationReached;
+			return pitchAndYawReached;
 		}
 	}
 }

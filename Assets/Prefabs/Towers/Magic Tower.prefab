@@ -154,8 +154,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _shootPoint: {fileID: 905266653750636145}
-  _towerData:
-    _underlyingValue: {fileID: 11400000, guid: 58c0779c6eec3d34085247209418266b, type: 2}
+  _towerData: {fileID: 11400000, guid: 58c0779c6eec3d34085247209418266b, type: 2}
   _singleTargetSelector:
     _underlyingValue: {fileID: 7816934169140869092}
 --- !u!114 &7816934169140869092

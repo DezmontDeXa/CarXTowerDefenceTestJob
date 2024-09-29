@@ -7,18 +7,16 @@ namespace TowerDefence.Monsters
 {
 	public class Monster : MonoBehaviour, IPoolable, IMonster
 	{
-		[SerializeField] private float _speed = 1f;
-		[SerializeField] private int _maxHP = 30;
+		[SerializeField][Min(0)] private float _speed = 1f;
+		[SerializeField][Min(1)] private int _maxHP = 30;
+
+		private const float REACH_DISTANCE = 0.3f;
 
 		private Transform _moveTarget;
-		const float _reachDistance = 0.3f;
 		private float _lostDistanace = 0;
-
 		private int _hp;
-		private Rigidbody _rigidbody;
 		private Action _releaseAction;
 		private Vector3 _direction;
-		private Vector3 _actualVelocity;
 
 		public Vector3 Position => transform.position;
 
@@ -28,31 +26,56 @@ namespace TowerDefence.Monsters
 
 		public float Speed => _speed;
 
-		public event Action<IMonster> Died;
+		public int MaxHP => _maxHP;
 
-		private void Awake()
-		{
-			_rigidbody = GetComponent<Rigidbody>();
-		}
+		public int HP=> _hp;
+
+		public event Action<int> HpChanged;
+
+
+		public event Action<IMonster> Died;
+		public event Action<IMonster> Finished;
+
 
 		private void Update()
 		{
 			if (_moveTarget == null)
-				return;
-
-			_lostDistanace = Vector3.Distance(transform.position, _moveTarget.transform.position);
-
-			if (_lostDistanace <= _reachDistance)
 			{
-				_releaseAction?.Invoke();
+				Debug.LogWarning("Monster: Move target is null. Die.");
+				Die();
 				return;
 			}
 
+			if (IsFinished())
+			{
+				Finished?.Invoke(this);
+				Release();
+				return;
+			}
+
+			MoveToTarget();
+		}
+
+
+		private void MoveToTarget()
+		{
 			_direction = (_moveTarget.transform.position - transform.position).normalized;
 
 			var moveOffset = Velocity * Time.deltaTime;
 
 			transform.position += moveOffset;
+		}
+
+		private bool IsFinished()
+		{
+			_lostDistanace = Vector3.Distance(transform.position, _moveTarget.transform.position);
+
+			return _lostDistanace <= REACH_DISTANCE;
+		}
+
+		private void Release()
+		{
+			_releaseAction?.Invoke();
 		}
 
 		public void SetMoveTarget(Transform target)
@@ -64,6 +87,8 @@ namespace TowerDefence.Monsters
 		{
 			_hp -= damage;
 
+			HpChanged?.Invoke(_hp);
+
 			if (_hp <= 0)
 				Die();
 		}
@@ -71,7 +96,7 @@ namespace TowerDefence.Monsters
 		private void Die()
 		{
 			Died?.Invoke(this);
-			_releaseAction?.Invoke();
+			Release();
 		}
 
 		public void OnSpawn(Action releaseAction)
@@ -88,5 +113,5 @@ namespace TowerDefence.Monsters
 			// NOTHING
 			gameObject.SetActive(false);
 		}
-	}
+	}	
 }

@@ -11,9 +11,13 @@ namespace TowerDefence.Monsters.Spawners
 	{
 		private float m_lastSpawn = -1;
 		private MonstersPools _monstersPools;
+		private bool _isRunning = true;
 		private readonly Settings _settings;
 
+		public bool IsRunning =>_isRunning;
+
 		public event Action<IMonstersSpawner, IMonster> MonsterSpawned;
+
 
 		public MonstersSpawner(Settings settings, MonstersPools monstersPools)
 		{
@@ -24,10 +28,23 @@ namespace TowerDefence.Monsters.Spawners
 
 		public void Tick()
 		{
+			if (!_isRunning)
+				return;
+
 			if (Time.time <= m_lastSpawn + _settings.Interval)
 				return;
 
 			Spawn();
+		}
+
+		public void StartSpawning()
+		{
+			_isRunning = true;
+		}
+
+		public void StopSpawning()
+		{
+			_isRunning = false;
 		}
 
 		private void Spawn()
@@ -47,7 +64,7 @@ namespace TowerDefence.Monsters.Spawners
 		[Serializable]
 		public class Settings
 		{
-			[SerializeField] private float _interval = 3f;
+			[SerializeField][Min(0.1f)] private float _interval = 3f;
 			[SerializeField] private Transform _moveTarget;
 			[SerializeField] private Transform _spawnPosition;
 			[SerializeField] private Monster[] _monsters;

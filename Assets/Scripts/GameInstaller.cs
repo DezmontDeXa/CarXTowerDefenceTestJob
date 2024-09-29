@@ -1,4 +1,4 @@
-﻿using TowerDefence.Abstractions.Monsters.Collections;
+﻿using System;
 using TowerDefence.Infrastructure;
 using TowerDefence.Monsters.Factories;
 using TowerDefence.Monsters.Pools;
@@ -13,6 +13,9 @@ namespace TowerDefence
 {
 	public class GameInstaller : MonoInstallerBase
 	{
+		[Header("Global")]
+		[SerializeField] private Camera _mainCamera;
+
 		[Header("Monsters")]
 		[SerializeField] private MonstersPools.Settings _monstersPoolSettings;
 		[SerializeField] private MonstersSpawner.Settings _monstersSpawnerSettings;
@@ -22,9 +25,16 @@ namespace TowerDefence
 
 		public override void Install(IContainerBuilder builder)
 		{
+			BindGlobals(builder);
+
 			BindMonsters(builder);
 
 			BindProjectiles(builder);
+		}
+
+		private void BindGlobals(IContainerBuilder builder)
+		{
+			builder.RegisterInstance(_mainCamera);
 		}
 
 		private void BindMonsters(IContainerBuilder builder)

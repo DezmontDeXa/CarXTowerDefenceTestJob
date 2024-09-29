@@ -28,20 +28,25 @@ namespace TowerDefence
 
 		private void Spawner_MonsterSpawned(IMonstersSpawner spawner, IMonster monster)
 		{
-			monster.Died += Monster_Died;
+			monster.Died += MonsterDespawned;
+			monster.Finished += MonsterDespawned;
 			_aliveMonsters.Add(monster);
 		}
 
-		private void Monster_Died(IMonster monster)
+		private void MonsterDespawned(IMonster monster)
 		{
 			_aliveMonsters.Remove(monster);
-			monster.Died -= Monster_Died;
+			monster.Died -= MonsterDespawned;
+			monster.Finished -= MonsterDespawned;
 		}
 
 		public void Dispose()
 		{
 			foreach (var monster in _aliveMonsters)
-				monster.Died -= Monster_Died;
+			{
+				monster.Died -= MonsterDespawned;
+				monster.Finished -= MonsterDespawned;
+			}
 		}
 	}
 }

@@ -8,6 +8,7 @@ namespace TowerDefence.Tools
 {
 	public class GizmosDrawer : MonoInstallerBase
 	{
+
 		private List<Action> _actions = new List<Action>();
 		private List<Action> _infiniteActions = new List<Action>();
 		private List<TemporaryAction> _timeActions = new List<TemporaryAction>();
@@ -21,17 +22,23 @@ namespace TowerDefence.Tools
 
 		public void AddOneFrameTask(Action drawGizmoAction)
 		{
+#if UNITY_EDITOR
 			_actions.Add(drawGizmoAction);
+#endif
 		}
 
 		public void AddForeverTask(Action drawGizmoAction)
 		{
+#if UNITY_EDITOR
 			_infiniteActions.Add(drawGizmoAction);
+#endif
 		}
 
 		public void AddTemporaryTask(Action drawGizmoAction, float seconds)
 		{
+#if UNITY_EDITOR
 			_timeActions.Add(new TemporaryAction(drawGizmoAction, Time.time, seconds));
+#endif
 		}
 
 		private void OnDrawGizmos()
@@ -80,5 +87,6 @@ namespace TowerDefence.Tools
 
 			public float Duration { get; }
 		}
+
 	}
 }
