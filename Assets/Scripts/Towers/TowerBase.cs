@@ -1,4 +1,5 @@
 ﻿using AYellowpaper;
+using System;
 using TowerDefence.Abstractions.Monsters;
 using TowerDefence.Abstractions.Projectilies;
 using TowerDefence.Abstractions.Projectilies.Pools;
@@ -24,6 +25,10 @@ namespace TowerDefence.Towers
 
 		protected TTowerData TowerData => _towerData.Value;
 
+		public float LoadingProgress { get; private set; }
+
+		public event Action<ITower, float> LoadingProgressChanged;
+
 		[Inject]
 		private void Constructor(IProjectilesPools projectilesPools)
 		{
@@ -42,7 +47,9 @@ namespace TowerDefence.Towers
 			var target = SelectTarget();
 
 			PrepareForTarget(target);
-				
+
+			UpdateProgress();
+
 			if (!CanShoot(target))
 				return;
 
@@ -51,6 +58,24 @@ namespace TowerDefence.Towers
 			_lastShotTime = Time.time;
 		}
 
+		private void UpdateProgress()
+		{
+			LoadingProgress = GetLoadingProgress();
+
+			LoadingProgressChanged.Invoke(this, LoadingProgress);
+		}
+
+		private float GetLoadingProgress()
+		{
+			var loadedTime = Time.time - _lastShotTime;
+
+			var amount = loadedTime / _towerData.Value.ShootInterval;
+
+			if (amount > 1f)
+				amount = 1;
+
+			return amount;
+		}
 
 		protected virtual void PrepareForTarget(IMonster target) { }
 
